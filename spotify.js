@@ -1,57 +1,50 @@
-const clientId = "79f52346df4f474a8b8d82fe59ddc635";
-const clientSecret = "fca915a0163648b493df84d61b6c5172";
-const redirecturi = "http://127.0.0.1:5500/spotify.html";
-const scopes = [
-  "user-read-private",
-  "user-library-read",
-  "user-library-modify",
-  "user-read-playback-state",
-  "user-read-currently-playing",
-  "user-modify-playback-state",
-];
-let code = "";
-const tokenUrl = "https://accounts.spotify.com/api/token";
-const auth = btoa(`${clientId}:${clientSecret}`);
+const client_id = '79f52346df4f474a8b8d82fe59ddc635';
+const redirect_uri= 'http://127.0.0.1:5500/spotify.html';
+const grant_type= "authorization_code";
+const client_secret = "b54aa5ebd4eb4a739dd24317157443a1"
+const auth = btoa(`${client_id}:${client_secret}`)
+const tokenurl = 'https://accounts.spotify.com/api/token'
 const options = {
   method: "POST",
   headers: {
     "Content-Type": "application/x-www-form-urlencoded",
     Authorization: `Basic ${auth}`,
   },
-  body: "grant_type=client_credentials",
+  body: `grant_type=client_credentials&code=${console.log(getcode())}&redirect_uri=${redirect_uri}&${client_id}&${client_secret}`,
 };
 
-// Redirect the user to the Spotify authorization page
-function redirectToSpotifyAuth() {
-  const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirecturi}&scope=${scopes.join(
-    "%20"
-  )}`;
-  window.location = authUrl;
+function redirect(){
+  const url = `https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=code&redirect_uri=${redirect_uri}`
+
+ window.location = url
 }
 
-// Handle the redirect back to the application
 async function handleAuthCallback() {
   try {
-    const params = new URLSearchParams(window.location.search);
-    code = params.get("code");
-    console.log(code);
+    getcode()
   } catch (error) {
     console.error(error);
   }
+  getToken()
 }
 
-// Check for the auth callback
+async function getToken(){
+const response = await fetch(tokenurl,options)
+const data = await response.json()
+console.log(data)
+}
+
 if (window.location.href.includes("code")) {
   handleAuthCallback();
+ 
 } else {
-  redirectToSpotifyAuth();
+  redirect();
 }
 
-fetch(tokenUrl, options)
-  .then((response) => response.json())
-  .then((data) => {
-    console.log(data.access_token);
-  })
-  .catch((error) => {
-    console.log("Error", error);
-  });
+function getcode(){
+  let code = null
+  const params = new URLSearchParams(window.location.search);
+  code = params.get("code");
+  console.log(code)
+  return code
+}
